@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Chaos Deck Builder</title>
+
+<style>
+
+body{
+font-family:Arial;
+text-align:center;
+background:#1e1e1e;
+color:white;
+}
+
+button{
+padding:12px 25px;
+font-size:18px;
+background:#4CAF50;
+color:white;
+border:none;
+border-radius:6px;
+cursor:pointer;
+margin-bottom:20px;
+}
+
+button:hover{
+background:#45a049;
+}
+
+.deck{
+margin-top:30px;
+}
+
+.deckslots{
+display:grid;
+grid-template-columns:repeat(4,120px);
+grid-gap:12px;
+justify-content:center;
+margin-top:15px;
+}
+
+.slot{
+width:120px;
+height:150px;
+background:#2c2c2c;
+border-radius:12px;
+display:flex;
+justify-content:center;
+align-items:center;
+position:relative;
+perspective:800px;
+}
+
+.card{
+width:110px;
+height:140px;
+position:absolute;
+transform-style:preserve-3d;
+transition:transform .7s;
+}
+
+.card.flip{
+transform:rotateY(180deg);
+}
+
+.card-face{
+position:absolute;
+width:100%;
+height:100%;
+backface-visibility:hidden;
+border-radius:10px;
+}
+
+.card-front{
+background:#111;
+}
+
+.card-back{
+transform:rotateY(180deg);
+}
+
+.card-back img{
+width:110px;
+border-radius:10px;
+}
+
+.card p{
+font-size:12px;
+margin-top:2px;
+}
+
+h2{
+margin-top:25px;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>🎲 Chaos Deck Builder</h1>
+
+<button onclick="generateDecks()">Generate 2 Decks</button>
+
+<div id="results"></div>
+
+<script>
+
+const cards = [
+{name:"Electro Spirit",elixir:1,img:"https://royaleapi.github.io/cr-api-assets/cards/electro-spirit.png"},
+{name:"Ice Spirit",elixir:1,img:"https://royaleapi.github.io/cr-api-assets/cards/ice-spirit.png"},
+{name:"Snowball",elixir:2,img:"https://royaleapi.github.io/cr-api-assets/cards/giant-snowball.png"},
+{name:"Knight",elixir:3,img:"https://royaleapi.github.io/cr-api-assets/cards/knight.png"},
+{name:"Mortar",elixir:4,img:"https://royaleapi.github.io/cr-api-assets/cards/mortar.png"},
+{name:"Rascals",elixir:5,img:"https://royaleapi.github.io/cr-api-assets/cards/rascals.png"},
+{name:"Royal Giant",elixir:6,img:"https://royaleapi.github.io/cr-api-assets/cards/royal-giant.png"},
+{name:"Tombstone",elixir:3,img:"https://royaleapi.github.io/cr-api-assets/cards/tombstone.png"},
+{name:"Dart Goblin",elixir:3,img:"https://royaleapi.github.io/cr-api-assets/cards/dart-goblin.png"},
+{name:"Elixir Golem",elixir:3,img:"https://royaleapi.github.io/cr-api-assets/cards/elixir-golem.png"},
+{name:"Musketeer",elixir:4,img:"https://royaleapi.github.io/cr-api-assets/cards/musketeer.png"},
+{name:"Fireball",elixir:4,img:"https://royaleapi.github.io/cr-api-assets/cards/fireball.png"},
+{name:"Flying Machine",elixir:4,img:"https://royaleapi.github.io/cr-api-assets/cards/flying-machine.png"},
+{name:"Zappies",elixir:4,img:"https://royaleapi.github.io/cr-api-assets/cards/zappies.png"},
+{name:"Furnace",elixir:4,img:"https://royaleapi.github.io/cr-api-assets/cards/furnace.png"},
+{name:"Giant",elixir:5,img:"https://royaleapi.github.io/cr-api-assets/cards/giant.png"},
+{name:"Wizard",elixir:5,img:"https://royaleapi.github.io/cr-api-assets/cards/wizard.png"},
+{name:"Inferno Tower",elixir:5,img:"https://royaleapi.github.io/cr-api-assets/cards/inferno-tower.png"},
+{name:"Rocket",elixir:6,img:"https://royaleapi.github.io/cr-api-assets/cards/rocket.png"},
+{name:"Rage",elixir:2,img:"https://royaleapi.github.io/cr-api-assets/cards/rage.png"},
+{name:"Goblin Barrel",elixir:3,img:"https://royaleapi.github.io/cr-api-assets/cards/goblin-barrel.png"},
+{name:"Baby Dragon",elixir:4,img:"https://royaleapi.github.io/cr-api-assets/cards/baby-dragon.png"},
+{name:"Poison",elixir:4,img:"https://royaleapi.github.io/cr-api-assets/cards/poison.png"},
+{name:"Hunter",elixir:4,img:"https://royaleapi.github.io/cr-api-assets/cards/hunter.png"},
+{name:"Goblin Drill",elixir:4,img:"https://royaleapi.github.io/cr-api-assets/cards/goblin-drill.png"},
+{name:"Witch",elixir:5,img:"https://royaleapi.github.io/cr-api-assets/cards/witch.png"},
+{name:"Executioner",elixir:5,img:"https://royaleapi.github.io/cr-api-assets/cards/executioner.png"},
+{name:"Goblin Giant",elixir:6,img:"https://royaleapi.github.io/cr-api-assets/cards/goblin-giant.png"},
+{name:"X-Bow",elixir:6,img:"https://royaleapi.github.io/cr-api-assets/cards/x-bow.png"},
+{name:"P.E.K.K.A",elixir:7,img:"https://royaleapi.github.io/cr-api-assets/cards/pekka.png"},
+{name:"Golem",elixir:8,img:"https://royaleapi.github.io/cr-api-assets/cards/golem.png"},
+{name:"The Log",elixir:2,img:"https://royaleapi.github.io/cr-api-assets/cards/the-log.png"},
+{name:"Princess",elixir:3,img:"https://royaleapi.github.io/cr-api-assets/cards/princess.png"},
+{name:"Ice Wizard",elixir:3,img:"https://royaleapi.github.io/cr-api-assets/cards/ice-wizard.png"},
+{name:"Fisherman",elixir:3,img:"https://royaleapi.github.io/cr-api-assets/cards/fisherman.png"},
+{name:"Electro Wizard",elixir:4,img:"https://royaleapi.github.io/cr-api-assets/cards/electro-wizard.png"},
+{name:"Night Witch",elixir:4,img:"https://royaleapi.github.io/cr-api-assets/cards/night-witch.png"},
+{name:"Mother Witch",elixir:4,img:"https://royaleapi.github.io/cr-api-assets/cards/mother-witch.png"},
+{name:"Ram Rider",elixir:5,img:"https://royaleapi.github.io/cr-api-assets/cards/ram-rider.png"},
+{name:"Graveyard",elixir:5,img:"https://royaleapi.github.io/cr-api-assets/cards/graveyard.png"},
+{name:"Mega Knight",elixir:7,img:"https://royaleapi.github.io/cr-api-assets/cards/mega-knight.png"},
+{name:"Lava Hound",elixir:7,img:"https://royaleapi.github.io/cr-api-assets/cards/lava-hound.png"}
+];
+
+const adjectives=["Chaotic","Savage","Wild","Turbo","Angry","Unstable","Mad","Cursed","Elite","Greedy"];
+const themes=["Goblin","Dragon","Wizard","Giant","Knight","Spirit","Lava","Shadow","Royal","Inferno"];
+const endings=["Mayhem","Madness","Carnage","Rampage","Storm","Chaos","Takeover","Domination","Explosion","Army"];
+
+function randomName(){
+let a=adjectives[Math.floor(Math.random()*adjectives.length)];
+let b=themes[Math.floor(Math.random()*themes.length)];
+let c=endings[Math.floor(Math.random()*endings.length)];
+return a+" "+b+" "+c;
+}
+
+function createDeck(){
+let deck=[]
+while(deck.length<8){
+let r=Math.floor(Math.random()*cards.length)
+if(!deck.includes(r)) deck.push(r)
+}
+return deck
+}
+
+function renderDeck(deck){
+
+let elixir=0
+let slots=""
+
+deck.forEach((i,index)=>{
+elixir+=cards[i].elixir
+
+slots+=`
+<div class="slot">
+<div class="card" id="card${Math.random()}">
+<div class="card-face card-front"></div>
+<div class="card-face card-back">
+<img src="${cards[i].img}">
+<p>${cards[i].name}</p>
+</div>
+</div>
+</div>
+`
+})
+
+let avg=(elixir/8).toFixed(1)
+
+return `
+<div class="deck">
+<h2>${randomName()}</h2>
+<p>Average Elixir: ${avg}</p>
+<div class="deckslots">${slots}</div>
+</div>
+`
+}
+
+function generateDecks(){
+
+let deck1=createDeck()
+let deck2=createDeck()
+
+document.getElementById("results").innerHTML=
+renderDeck(deck1)+renderDeck(deck2)
+
+setTimeout(()=>{
+document.querySelectorAll(".card").forEach(c=>{
+c.classList.add("flip")
+})
+},100)
+
+}
+
+</script>
+
+</body>
+</html>
